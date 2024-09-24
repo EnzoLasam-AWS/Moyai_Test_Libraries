@@ -16,19 +16,9 @@ public final class GeneratedPluginRegistrant {
   private static final String TAG = "GeneratedPluginRegistrant";
   public static void registerWith(@NonNull FlutterEngine flutterEngine) {
     try {
-      flutterEngine.getPlugins().add(new pl.pszklarska.beaconbroadcast.BeaconBroadcastPlugin());
-    } catch (Exception e) {
-      Log.e(TAG, "Error registering plugin beacon_broadcast, pl.pszklarska.beaconbroadcast.BeaconBroadcastPlugin", e);
-    }
-    try {
       flutterEngine.getPlugins().add(new it.thoson.device_uuid.DeviceUuidPlugin());
     } catch (Exception e) {
       Log.e(TAG, "Error registering plugin device_uuid, it.thoson.device_uuid.DeviceUuidPlugin", e);
-    }
-    try {
-      flutterEngine.getPlugins().add(new de.gigadroid.flutter_udid.FlutterUdidPlugin());
-    } catch (Exception e) {
-      Log.e(TAG, "Error registering plugin flutter_udid, de.gigadroid.flutter_udid.FlutterUdidPlugin", e);
     }
   }
 }
