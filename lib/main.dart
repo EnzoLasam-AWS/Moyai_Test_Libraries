@@ -4,9 +4,6 @@
 import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
-import 'package:uuid/uuid.dart';
-import 'package:beacon_broadcast/beacon_broadcast.dart';
-import 'package:flutter_udid/flutter_udid.dart';
 import 'package:device_uuid/device_uuid.dart';
 
 
@@ -23,13 +20,6 @@ class Moyai extends StatefulWidget {
 }
 
 class _MoyaiState extends State<Moyai> {
-  int ninjaLevel = 0;
-  static const uuid = Uuid();
-  Future<String> udid =  FlutterUdid.udid;
-  static String id4 = uuid.v4();
-  static String id1 = uuid.v1();
-  static String id5 = uuid.v5(Uuid.NAMESPACE_URL, 'www.google.com');
-  final test = id1.isEmpty ? "fail" : id1;
   String _uuid = 'Unknown';
   final _deviceUuidPlugin = DeviceUuid();
 
@@ -75,61 +65,6 @@ class _MoyaiState extends State<Moyai> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-
-            const Text(
-              'UUID Version 1',
-              style: TextStyle(
-                color: Colors.grey,
-                letterSpacing: 2.0,
-              ),
-            ),
-            SizedBox(height: 10.0),
-            Text(
-              id1,
-              style: TextStyle(
-                color: Colors.amberAccent[200],
-                fontWeight: FontWeight.bold,
-                fontSize: 28.0,
-                letterSpacing: 2.0,
-              ),
-            ),
-            const SizedBox(height: 30.0),
-            const Text(
-              'UUID Version 4',
-              style: TextStyle(
-                color: Colors.grey,
-                letterSpacing: 2.0,
-              ),
-            ),
-            const SizedBox(height: 10.0),
-            Text(
-              id4,
-              style: TextStyle(
-                color: Colors.amberAccent[200],
-                fontWeight: FontWeight.bold,
-                fontSize: 28.0,
-                letterSpacing: 2.0,
-              ),
-            ),
-            const SizedBox(height: 30.0),
-            const Text(
-              'UUID Version 5',
-              style: TextStyle(
-                color: Colors.grey,
-                letterSpacing: 2.0,
-              ),
-            ),
-            const SizedBox(height: 10.0),
-            Text(
-              id5,
-              style: TextStyle(
-                color: Colors.amberAccent[200],
-                fontWeight: FontWeight.bold,
-                fontSize: 28.0,
-                letterSpacing: 2.0,
-              ),
-            ),
-            const SizedBox(height: 30.0),
             const Text(
               'Device UUID',
               style: TextStyle(
@@ -147,6 +82,7 @@ class _MoyaiState extends State<Moyai> {
                 letterSpacing: 2.0,
               ),
             ),
+            const SizedBox(height: 10.0),
           ],
         ),
       ),
