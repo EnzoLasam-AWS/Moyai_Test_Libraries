@@ -12,6 +12,12 @@
 @import beacon_broadcast;
 #endif
 
+#if __has_include(<device_uuid/DeviceUuidPlugin.h>)
+#import <device_uuid/DeviceUuidPlugin.h>
+#else
+@import device_uuid;
+#endif
+
 #if __has_include(<flutter_udid/FlutterUdidPlugin.h>)
 #import <flutter_udid/FlutterUdidPlugin.h>
 #else
@@ -22,6 +28,7 @@
 
 + (void)registerWithRegistry:(NSObject<FlutterPluginRegistry>*)registry {
   [BeaconBroadcastPlugin registerWithRegistrar:[registry registrarForPlugin:@"BeaconBroadcastPlugin"]];
+  [DeviceUuidPlugin registerWithRegistrar:[registry registrarForPlugin:@"DeviceUuidPlugin"]];
   [FlutterUdidPlugin registerWithRegistrar:[registry registrarForPlugin:@"FlutterUdidPlugin"]];
 }
 

@@ -33,6 +33,7 @@ dependencies:
   uuid:
   beacon_broadcast:
   flutter_udid:
+  device_uuid: ^0.0.4
 
 
 

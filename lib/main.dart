@@ -1,11 +1,13 @@
 
 // Importing important packages require to connect
 // Flutter and Dart
-
+import 'dart:async';
+import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import 'package:beacon_broadcast/beacon_broadcast.dart';
 import 'package:flutter_udid/flutter_udid.dart';
+import 'package:device_uuid/device_uuid.dart';
 
 
 // Main Function
@@ -28,6 +30,35 @@ class _MoyaiState extends State<Moyai> {
   static String id1 = uuid.v1();
   static String id5 = uuid.v5(Uuid.NAMESPACE_URL, 'www.google.com');
   final test = id1.isEmpty ? "fail" : id1;
+  String _uuid = 'Unknown';
+  final _deviceUuidPlugin = DeviceUuid();
+
+  @override
+  void initState() {
+    super.initState();
+    initPlatformState();
+  }
+
+  // Platform messages are asynchronous, so we initialize in an async method.
+  Future<void> initPlatformState() async {
+    String uuid;
+    // Platform messages may fail, so we use a try/catch PlatformException.
+    // We also handle the message potentially returning null.
+    try {
+      uuid = await _deviceUuidPlugin.getUUID() ?? 'Unknown uuid version';
+    } on PlatformException {
+      uuid = 'Failed to get uuid version.';
+    }
+
+    // If the widget was removed from the tree while the asynchronous platform
+    // message was in flight, we want to discard the reply rather than calling
+    // setState to update our non-existent appearance.
+    if (!mounted) return;
+
+    setState(() {
+      _uuid = uuid;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -45,7 +76,7 @@ class _MoyaiState extends State<Moyai> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
 
-            Text(
+            const Text(
               'UUID Version 1',
               style: TextStyle(
                 color: Colors.grey,
@@ -62,15 +93,15 @@ class _MoyaiState extends State<Moyai> {
                 letterSpacing: 2.0,
               ),
             ),
-            SizedBox(height: 30.0),
-            Text(
+            const SizedBox(height: 30.0),
+            const Text(
               'UUID Version 4',
               style: TextStyle(
                 color: Colors.grey,
                 letterSpacing: 2.0,
               ),
             ),
-            SizedBox(height: 10.0),
+            const SizedBox(height: 10.0),
             Text(
               id4,
               style: TextStyle(
@@ -80,17 +111,17 @@ class _MoyaiState extends State<Moyai> {
                 letterSpacing: 2.0,
               ),
             ),
-            SizedBox(height: 30.0),
-            Text(
+            const SizedBox(height: 30.0),
+            const Text(
               'UUID Version 5',
               style: TextStyle(
                 color: Colors.grey,
                 letterSpacing: 2.0,
               ),
             ),
-            SizedBox(height: 10.0),
+            const SizedBox(height: 10.0),
             Text(
-              '$id5',
+              id5,
               style: TextStyle(
                 color: Colors.amberAccent[200],
                 fontWeight: FontWeight.bold,
@@ -98,17 +129,17 @@ class _MoyaiState extends State<Moyai> {
                 letterSpacing: 2.0,
               ),
             ),
-            SizedBox(height: 30.0),
-            Text(
-              'Flutter UDID',
+            const SizedBox(height: 30.0),
+            const Text(
+              'Device UUID',
               style: TextStyle(
                 color: Colors.grey,
                 letterSpacing: 2.0,
               ),
             ),
-            SizedBox(height: 10.0),
+            const SizedBox(height: 10.0),
             Text(
-              '$udid',
+              _uuid,
               style: TextStyle(
                 color: Colors.amberAccent[200],
                 fontWeight: FontWeight.bold,
