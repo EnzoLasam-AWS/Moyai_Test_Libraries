@@ -9,6 +9,7 @@
 .history
 .svn/
 migrate_working_dir/
+pubspec.lock
 
 # IntelliJ related
 *.iml
@@ -32,6 +33,7 @@ migrate_working_dir/
 .pub/
 /build/
 
+
 # Symbolication related
 app.*.symbols
 
@@ -42,3 +44,5 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+/android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java
+/ios/Runner/GeneratedPluginRegistrant.m
