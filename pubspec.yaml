@@ -31,6 +31,8 @@ dependencies:
   flutter:
     sdk: flutter
   device_uuid: ^0.0.4
+  flutter_beacon:
+  get:
 
 
 
