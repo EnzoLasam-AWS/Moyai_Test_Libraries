@@ -5,13 +5,20 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:device_uuid/device_uuid.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:moyai_test_libraries/firebase_api.dart';
 
 
 // Main Function
 
-void main() => runApp(MaterialApp(
-  home: Moyai(),
-));
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  FirebaseApi().initNotifications();
+  runApp(MaterialApp(
+    home: Moyai(),
+  ));
+}
 
 class Moyai extends StatefulWidget {
   @override
@@ -20,7 +27,7 @@ class Moyai extends StatefulWidget {
 }
 
 class _MoyaiState extends State<Moyai> {
-  String _uuid = 'Unknown';
+  String _fcmToken = 'Unknown';
   final _deviceUuidPlugin = DeviceUuid();
 
   @override
@@ -46,16 +53,19 @@ class _MoyaiState extends State<Moyai> {
     if (!mounted) return;
 
     setState(() {
-      _uuid = uuid;
     });
+
   }
+
+
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[900],
       appBar: AppBar(
-        title: Text('Test App'),
+        title: const Text('Test App'),
         centerTitle: true,
         backgroundColor: Colors.grey[850],
         elevation: 0.0,
@@ -66,7 +76,7 @@ class _MoyaiState extends State<Moyai> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             const Text(
-              'Device UUID',
+              'FCM Token',
               style: TextStyle(
                 color: Colors.grey,
                 letterSpacing: 2.0,
@@ -74,7 +84,7 @@ class _MoyaiState extends State<Moyai> {
             ),
             const SizedBox(height: 10.0),
             Text(
-              _uuid,
+              _fcmToken,
               style: TextStyle(
                 color: Colors.amberAccent[200],
                 fontWeight: FontWeight.bold,

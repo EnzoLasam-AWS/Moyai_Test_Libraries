@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "343495127587",
+    "project_id": "moyai-test-library",
+    "storage_bucket": "moyai-test-library.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:343495127587:android:e09747c38769cbf95bf796",
+        "android_client_info": {
+          "package_name": "com.example.moyai_test_libraries"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCZ5h1C09CFFOQF7rA9xhJw7xBmjxMjG_M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
