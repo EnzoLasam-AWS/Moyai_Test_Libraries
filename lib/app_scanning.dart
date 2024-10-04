@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
-
+import 'dart:io' show Platform;
 import 'package:flutter_beacon/flutter_beacon.dart';
 import 'package:moyai_test_libraries/requirement_state_controller.dart';
 import 'package:get/get.dart';
@@ -33,7 +33,11 @@ class _TabScanningState extends State<TabScanning> {
     });
   }
 
+
+
+
   initScanBeacon() async {
+
     await flutterBeacon.initializeScanning;
     if (!controller.authorizationStatusOk ||
         !controller.locationServiceEnabled ||
@@ -47,11 +51,11 @@ class _TabScanningState extends State<TabScanning> {
     final regions = <Region>[
       Region(
         identifier: 'Cubeacon',
-        proximityUUID: 'CB10023F-A318-3394-4199-A8730C7C1AEC',
+        proximityUUID: '78d718c7-c25e-4511-9bfe-67b4e99595ff',
       ),
       Region(
         identifier: 'BeaconType2',
-        proximityUUID: '6a84c716-0f2a-1ce9-f210-6a63bd873dd9',
+        proximityUUID: 'E2C56DB5-DFFB-48D2-B060-D0F5A71096E0',
       ),
     ];
 
@@ -64,7 +68,7 @@ class _TabScanningState extends State<TabScanning> {
 
     _streamRanging =
         flutterBeacon.ranging(regions).listen((RangingResult result) {
-          print(result);
+          print('Stream: $result');
           if (mounted) {
             setState(() {
               _regionBeacons[result.region] = result.beacons;
@@ -77,6 +81,7 @@ class _TabScanningState extends State<TabScanning> {
           }
         });
   }
+
 
   pauseScanBeacon() async {
     _streamRanging?.pause();

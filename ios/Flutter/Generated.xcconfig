@@ -1,6 +1,6 @@
 // This is a generated file; do not edit or check into version control.
-FLUTTER_ROOT=C:\Android_tools\flutter
-FLUTTER_APPLICATION_PATH=D:\AWS_Projects\DevM_Arkray\Moyai_test_libraries
+FLUTTER_ROOT=C:\Android\flutter
+FLUTTER_APPLICATION_PATH=D:\Moyai Project\Moyai_Test_Libraries
 COCOAPODS_PARALLEL_CODE_SIGN=true
 FLUTTER_TARGET=lib\main.dart
 FLUTTER_BUILD_DIR=build

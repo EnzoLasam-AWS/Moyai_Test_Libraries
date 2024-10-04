@@ -1,7 +1,7 @@
 #!/bin/sh
 # This is a generated file; do not edit or check into version control.
-export "FLUTTER_ROOT=C:\Android_tools\flutter"
-export "FLUTTER_APPLICATION_PATH=D:\AWS_Projects\DevM_Arkray\Moyai_test_libraries"
+export "FLUTTER_ROOT=C:\Android\flutter"
+export "FLUTTER_APPLICATION_PATH=D:\Moyai Project\Moyai_Test_Libraries"
 export "COCOAPODS_PARALLEL_CODE_SIGN=true"
 export "FLUTTER_TARGET=lib\main.dart"
 export "FLUTTER_BUILD_DIR=build"
