@@ -1,90 +1,92 @@
-
-// Importing important packages require to connect
-// Flutter and Dart
-import 'dart:async';
-import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
-import 'package:device_uuid/device_uuid.dart';
+import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
+import 'package:permission_handler/permission_handler.dart';
 
-
-// Main Function
-
-void main() => runApp(MaterialApp(
-  home: Moyai(),
-));
-
-class Moyai extends StatefulWidget {
-  @override
-
-  _MoyaiState createState() => _MoyaiState();
+void main() {
+  runApp(MyApp());
 }
 
-class _MoyaiState extends State<Moyai> {
-  String _uuid = 'Unknown';
-  final _deviceUuidPlugin = DeviceUuid();
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Beacon Scanner',
+      home: BeaconScannerPage(),
+    );
+  }
+}
+
+class BeaconScannerPage extends StatefulWidget {
+  @override
+  _BeaconScannerPageState createState() => _BeaconScannerPageState();
+}
+
+class _BeaconScannerPageState extends State<BeaconScannerPage> {
+  final flutterReactiveBle = FlutterReactiveBle();
+  late Stream<DiscoveredDevice> scanStream;
+  List<DiscoveredDevice> _beacons = [];
+
+  // Define your beacon UUID here
+  final String beaconUuid = "YOUR_BEACON_UUID"; // Replace with your beacon UUID
 
   @override
   void initState() {
     super.initState();
-    initPlatformState();
+    _requestPermissions();
+    _startScanning();
   }
 
-  // Platform messages are asynchronous, so we initialize in an async method.
-  Future<void> initPlatformState() async {
-    String uuid;
-    // Platform messages may fail, so we use a try/catch PlatformException.
-    // We also handle the message potentially returning null.
-    try {
-      uuid = await _deviceUuidPlugin.getUUID() ?? 'Unknown uuid version';
-    } on PlatformException {
-      uuid = 'Failed to get uuid version.';
-    }
+  Future<void> _requestPermissions() async {
+    await Permission.location.request();
+    await Permission.bluetoothScan.request();
+    await Permission.bluetoothConnect.request();
+  }
 
-    // If the widget was removed from the tree while the asynchronous platform
-    // message was in flight, we want to discard the reply rather than calling
-    // setState to update our non-existent appearance.
-    if (!mounted) return;
+  void _startScanning() {
+    scanStream = flutterReactiveBle.scanForDevices(
+      withServices: [], // Can be set to specific UUIDs if needed
+      scanMode: ScanMode.balanced,
+    );
 
-    setState(() {
-      _uuid = uuid;
+    scanStream.listen((device) {
+      // Check if the device's service UUID matches the beacon UUID
+      if (device.serviceUuids.contains(beaconUuid)) {
+        setState(() {
+          // Check if the device is already in the list
+          if (!_beacons.any((d) => d.id == device.id)) {
+            _beacons.add(device);
+          }
+        });
+      }
+    }, onError: (error) {
+      // Handle scan errors if necessary
+      print('Error scanning for devices: $error');
     });
+  }
+
+  @override
+  void dispose() {
+    // Dispose of resources if necessary
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[900],
       appBar: AppBar(
-        title: Text('Test App'),
-        centerTitle: true,
-        backgroundColor: Colors.grey[850],
-        elevation: 0.0,
+        title: const Text('Beacon Scanner'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.fromLTRB(30.0, 40.0, 30.0, 0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            const Text(
-              'Device UUID',
-              style: TextStyle(
-                color: Colors.grey,
-                letterSpacing: 2.0,
-              ),
-            ),
-            const SizedBox(height: 10.0),
-            Text(
-              _uuid,
-              style: TextStyle(
-                color: Colors.amberAccent[200],
-                fontWeight: FontWeight.bold,
-                fontSize: 28.0,
-                letterSpacing: 2.0,
-              ),
-            ),
-            const SizedBox(height: 10.0),
-          ],
-        ),
+      body: _beacons.isEmpty
+          ? const Center(child: Text('No beacons found'))
+          : ListView.builder(
+        itemCount: _beacons.length,
+        itemBuilder: (context, index) {
+          final device = _beacons[index];
+          return ListTile(
+            title: Text('Device Name: ${device.name.isEmpty ? 'Unknown' : device.name}'),
+            subtitle: Text('Device ID: ${device.id}'),
+          );
+        },
       ),
     );
   }
