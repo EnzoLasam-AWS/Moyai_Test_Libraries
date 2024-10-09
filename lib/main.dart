@@ -1,91 +1,138 @@
-
-// Importing important packages require to connect
-// Flutter and Dart
 import 'dart:async';
-import 'package:flutter/services.dart';
+
+import 'package:beacon_scanner/beacon_scanner.dart';
 import 'package:flutter/material.dart';
-import 'package:device_uuid/device_uuid.dart';
+import 'package:permission_handler/permission_handler.dart';
 
-
-// Main Function
-
-void main() => runApp(MaterialApp(
-  home: Moyai(),
-));
-
-class Moyai extends StatefulWidget {
-  @override
-
-  _MoyaiState createState() => _MoyaiState();
+void main() {
+  runApp(MyApp());
 }
 
-class _MoyaiState extends State<Moyai> {
-  String _uuid = 'Unknown';
-  final _deviceUuidPlugin = DeviceUuid();
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Beacon Scanner',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: BeaconScannerPage(),
+    );
+  }
+}
+
+class BeaconScannerPage extends StatefulWidget {
+  @override
+  _BeaconScannerPageState createState() => _BeaconScannerPageState();
+}
+
+class _BeaconScannerPageState extends State<BeaconScannerPage> {
+  List<Beacon> _beacons = [];
+  BeaconScanner? _beaconScanner; // Declare as nullable
+  StreamSubscription? _streamRanging;
 
   @override
   void initState() {
     super.initState();
-    initPlatformState();
+    _initBeaconScanning();
   }
 
-  // Platform messages are asynchronous, so we initialize in an async method.
-  Future<void> initPlatformState() async {
-    String uuid;
-    // Platform messages may fail, so we use a try/catch PlatformException.
-    // We also handle the message potentially returning null.
-    try {
-      uuid = await _deviceUuidPlugin.getUUID() ?? 'Unknown uuid version';
-    } on PlatformException {
-      uuid = 'Failed to get uuid version.';
+  Future<void> _initBeaconScanning() async {
+    // Request location and Bluetooth permissions
+    await _requestPermissions();
+
+    // Initialize the beacon scanning API
+    _beaconScanner = BeaconScanner.instance; // Use named constructor
+    bool isInitialized = await _beaconScanner!.initialize(true);
+    if (!isInitialized) {
+      print('Failed to initialize beacon scanning');
+      return;
     }
 
-    // If the widget was removed from the tree while the asynchronous platform
-    // message was in flight, we want to discard the reply rather than calling
-    // setState to update our non-existent appearance.
-    if (!mounted) return;
+    // Check if Bluetooth and location services are enabled
+    await _checkBluetoothAndLocation();
 
-    setState(() {
-      _uuid = uuid;
+    // Start scanning for beacons
+    _startScanning();
+    bool permission = await Permission.bluetoothScan.request().isGranted;
+    print('Permission for bluetoothScanning = ${permission}');
+  }
+
+  Future<void> _requestPermissions() async {
+    // Request location and Bluetooth permissions
+    Map<Permission, PermissionStatus> statuses = await [
+      Permission.bluetoothScan,
+      Permission.location,
+      Permission.locationAlways,
+      Permission.locationWhenInUse,
+      Permission.bluetooth,
+      Permission.bluetoothConnect,
+      Permission.bluetoothAdvertise,
+    ].request();
+
+    if(await Permission.bluetoothScan.isDenied) {
+      await [
+        Permission.location,
+        Permission.locationAlways,
+        Permission.locationWhenInUse,
+        Permission.bluetooth,
+        Permission.bluetoothScan,
+        Permission.bluetoothConnect,
+        Permission.bluetoothAdvertise,
+      ].request();
+    }
+      print('Permission for location = ${statuses[Permission.location]}');
+      print('Permission for locationAlways = ${statuses[Permission.locationAlways]}');
+      print('Permission for locationWhenInUse = ${statuses[Permission.locationWhenInUse]}');
+      print('Permission for bluetooth = ${statuses[Permission.bluetooth]}');
+      print('Permission for bluetoothScan = ${statuses[Permission.bluetoothScan]}');
+      print('Permission for bluetoothConnect = ${statuses[Permission.bluetoothConnect]}');
+      print('Permission for bluetoothAdvertise = ${statuses[Permission.bluetoothAdvertise]}');
+  }
+
+  Future<void> _checkBluetoothAndLocation() async {
+    bool isLocationEnabled = await _beaconScanner!.checkLocationServicesIfEnabled();
+    if (!isLocationEnabled) {
+      print('Location services are disabled.');
+    }
+  }
+
+  void _startScanning() {
+    _streamRanging = _beaconScanner!.ranging([const Region(identifier:'any', beaconId: null)]).listen((ScanResult result) {
+      setState(() {
+        _beacons = result.beacons;
+        print('App Is Scanning');
+      });
+    }, onError: (error) {
+      print("Error during ranging: $error");
     });
+  }
+
+  @override
+  void dispose() {
+    _streamRanging?.cancel(); // Stop scanning when the widget is disposed
+    _beaconScanner!.close(); // Close the beacon scanning API
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[900],
       appBar: AppBar(
-        title: Text('Test App'),
-        centerTitle: true,
-        backgroundColor: Colors.grey[850],
-        elevation: 0.0,
+        title: const Text('Beacon Scanner'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.fromLTRB(30.0, 40.0, 30.0, 0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            const Text(
-              'Device UUID',
-              style: TextStyle(
-                color: Colors.grey,
-                letterSpacing: 2.0,
-              ),
-            ),
-            const SizedBox(height: 10.0),
-            Text(
-              _uuid,
-              style: TextStyle(
-                color: Colors.amberAccent[200],
-                fontWeight: FontWeight.bold,
-                fontSize: 28.0,
-                letterSpacing: 2.0,
-              ),
-            ),
-            const SizedBox(height: 10.0),
-          ],
+      body: _beacons.isEmpty
+        ? const Center(child: Text('No beacons found.'))
+        : ListView.builder(
+          itemCount: _beacons.length,
+          itemBuilder: (context, index) {
+            final beacon = _beacons[index];
+            return ListTile(
+              title: Text('UUID: ${beacon.id.proximityUUID}'),
+              subtitle: Text('Major: ${beacon.id.majorId}, Minor: ${beacon.id.minorId }, RSSI: ${beacon.rssi}'),
+            );
+          },
         ),
-      ),
     );
   }
 }
