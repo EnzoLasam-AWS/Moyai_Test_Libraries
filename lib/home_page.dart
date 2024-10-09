@@ -29,31 +29,23 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     listeningState();
   }
   void requestBluetoothPermission() async {
-    // PermissionStatus bluetoothScan = await Permission.bluetoothScan.request();
-    // PermissionStatus bluetoothAdvertise = await Permission.bluetoothAdvertise.request();
-    // PermissionStatus bluetoothConnect = await Permission.bluetoothConnect.request();
-    // PermissionStatus location = await Permission.location.request();
-    // PermissionStatus bluetooth = await Permission.bluetooth.request();
     Map<Permission, PermissionStatus> statuses = await [
       Permission.bluetoothScan,
       Permission.bluetoothAdvertise,
       Permission.bluetoothConnect,
       Permission.location,
       Permission.bluetooth,
-      Permission.sensors,
-      Permission.storage,
+      Permission.locationWhenInUse,
+      Permission.nearbyWifiDevices,
     ].request();
-    print('PERMISSION CHECKING $statuses');
+    print('PERMISSION CHECKING ${statuses[Permission.bluetoothScan]}');
+    print('PERMISSION CHECKING ${statuses[Permission.bluetoothAdvertise]}');
+    print('PERMISSION CHECKING ${statuses[Permission.bluetoothConnect]}');
+    print('PERMISSION CHECKING ${statuses[Permission.location]}');
+    print('PERMISSION CHECKING ${statuses[Permission.bluetooth]}');
+    print('PERMISSION CHECKING ${statuses[Permission.locationWhenInUse]}');
+    print('PERMISSION CHECKING ${statuses[Permission.nearbyWifiDevices]}');
 
-    // if (bluetoothScan.isGranted && location.isGranted) {
-    //   print('PERMISSION CHECKING'
-    //       'location: ${Permission.location.isGranted}'
-    //       'bluetoothScan: ${Permission.bluetoothScan.isGranted}'
-    //       'bluetoothAdvertise: ${Permission.bluetoothAdvertise.isGranted}'
-    //       'bluetoothConnect: ${Permission.bluetoothConnect.isGranted}'
-    //       'location: ${Permission.location.isGranted}');
-    //   listeningState();
-    // } else {  }
   }
 
   listeningState() async {
@@ -208,6 +200,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         children: [
           TabScanning(),
           TabBroadcasting(),
+          Container(),
+
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
@@ -219,9 +213,12 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
           if (currentIndex == 0) {
             controller.startScanning();
-          } else {
+          } 
+          if (currentIndex == 1) {
             controller.pauseScanning();
             controller.startBroadcasting();
+          } else {
+            controller.pauseScanning();
           }
         },
         items: const [
@@ -234,8 +231,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
             label: 'Broadcast',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.bluetooth_audio),
-            label: 'Broadcast',
+            icon: Icon(Icons.stop),
+            label: 'Pause Scan',
           ),
         ],
       ),

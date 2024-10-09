@@ -15,6 +15,7 @@ class _TabScanningState extends State<TabScanning> {
   final _regionBeacons = <Region, List<Beacon>>{};
   final _beacons = <Beacon>[];
   final controller = Get.find<RequirementStateController>();
+  var isScanning = true;
 
   @override
   void initState() {
@@ -48,6 +49,7 @@ class _TabScanningState extends State<TabScanning> {
               'bluetoothEnabled=${controller.bluetoothEnabled}');
       return;
     }
+    isScanning = true;
     final regions = <Region>[
       Region(
         identifier: 'Cubeacon',
@@ -85,6 +87,7 @@ class _TabScanningState extends State<TabScanning> {
 
   pauseScanBeacon() async {
     _streamRanging?.pause();
+    isScanning = false;
     if (_beacons.isNotEmpty) {
       setState(() {
         _beacons.clear();
@@ -116,43 +119,43 @@ class _TabScanningState extends State<TabScanning> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: _beacons.isEmpty
-          ? Center(child: CircularProgressIndicator())
+          ? const Center(child: Column(children: [SizedBox.square(dimension: 50,),CircularProgressIndicator(), Text('Searching')],))
           : ListView(
-        children: ListTile.divideTiles(
-          context: context,
-          tiles: _beacons.map(
-                (beacon) {
-              return ListTile(
-                title: Text(
-                  beacon.proximityUUID,
-                  style: TextStyle(fontSize: 15.0),
-                ),
-                subtitle: new Row(
-                  mainAxisSize: MainAxisSize.max,
-                  children: <Widget>[
-                    Flexible(
-                      child: Text(
-                        'Major: ${beacon.major}\nMinor: ${beacon.minor}',
-                        style: TextStyle(fontSize: 13.0),
-                      ),
-                      flex: 1,
-                      fit: FlexFit.tight,
-                    ),
-                    Flexible(
-                      child: Text(
-                        'Accuracy: ${beacon.accuracy}m\nRSSI: ${beacon.rssi}',
-                        style: TextStyle(fontSize: 13.0),
-                      ),
-                      flex: 2,
-                      fit: FlexFit.tight,
-                    )
-                  ],
-                ),
-              );
-            },
-          ),
-        ).toList(),
-      ),
+              children: ListTile.divideTiles(
+                context: context,
+                tiles: _beacons.map(
+                      (beacon) {
+                    return ListTile(
+                      title: Text(
+                                beacon.proximityUUID,
+                                style: const TextStyle(fontSize: 15.0),
+                              ),
+                      subtitle: new Row(
+                          mainAxisSize: MainAxisSize.max,
+                          children: <Widget>[
+                            Flexible(
+                              flex: 1,
+                              fit: FlexFit.tight,
+                              child: Text(
+                                'Major: ${beacon.major}\nMinor: ${beacon.minor}',
+                                style: const TextStyle(fontSize: 13.0),
+                              ),
+                            ),
+                            Flexible(
+                              flex: 2,
+                              fit: FlexFit.tight,
+                              child: Text(
+                                        'Accuracy: ${beacon.accuracy}m\nRSSI: ${beacon.rssi}',
+                                        style: const TextStyle(fontSize: 13.0),
+                                      ),
+                            )
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ).toList(),
+              )
     );
   }
 }
