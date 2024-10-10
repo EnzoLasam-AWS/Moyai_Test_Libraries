@@ -1,90 +1,118 @@
-
-// Importing important packages require to connect
-// Flutter and Dart
 import 'dart:async';
-import 'package:flutter/services.dart';
+import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
-import 'package:device_uuid/device_uuid.dart';
+import 'package:beacons_plugin/beacons_plugin.dart';
+import 'package:permission_handler/permission_handler.dart';
 
-
-// Main Function
-
-void main() => runApp(MaterialApp(
-  home: Moyai(),
-));
-
-class Moyai extends StatefulWidget {
-  @override
-
-  _MoyaiState createState() => _MoyaiState();
+void main() {
+  runApp(MyApp());
 }
 
-class _MoyaiState extends State<Moyai> {
-  String _uuid = 'Unknown';
-  final _deviceUuidPlugin = DeviceUuid();
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Beacon Scanner',
+      home: BeaconScannerPage(),
+    );
+  }
+}
+
+class BeaconScannerPage extends StatefulWidget {
+  @override
+  _BeaconScannerPageState createState() => _BeaconScannerPageState();
+}
+
+class _BeaconScannerPageState extends State<BeaconScannerPage> {
+  final StreamController<String> beaconEventsController = StreamController<String>.broadcast();
+  String _beaconResult = "";
 
   @override
   void initState() {
     super.initState();
-    initPlatformState();
+    initializeBeaconScanner();
   }
 
-  // Platform messages are asynchronous, so we initialize in an async method.
-  Future<void> initPlatformState() async {
-    String uuid;
-    // Platform messages may fail, so we use a try/catch PlatformException.
-    // We also handle the message potentially returning null.
-    try {
-      uuid = await _deviceUuidPlugin.getUUID() ?? 'Unknown uuid version';
-    } on PlatformException {
-      uuid = 'Failed to get uuid version.';
+  Future<void> initializeBeaconScanner() async {
+    // Request permissions for location and Bluetooth
+    await _requestPermissions();
+
+    // Add a region to monitor all beacons (using an empty UUID)
+    await BeaconsPlugin.addRegion("myBeacon", "");  // Using empty string for any beacon
+
+    // Run in background if needed
+    await BeaconsPlugin.runInBackground(true);
+
+    // Start monitoring for beacons based on platform
+    if (Platform.isAndroid) {
+      BeaconsPlugin.channel.setMethodCallHandler((call) async {
+        if (call.method == 'scannerReady') {
+          await BeaconsPlugin.startMonitoring();
+        }
+      });
+    } else if (Platform.isIOS) {
+      await BeaconsPlugin.startMonitoring();
     }
 
-    // If the widget was removed from the tree while the asynchronous platform
-    // message was in flight, we want to discard the reply rather than calling
-    // setState to update our non-existent appearance.
-    if (!mounted) return;
+    // Listen to beacon events
+    BeaconsPlugin.listenToBeacons(beaconEventsController);
 
-    setState(() {
-      _uuid = uuid;
-    });
+    beaconEventsController.stream.listen(
+            (data) {
+          if (data.isNotEmpty) {
+            setState(() {
+              _beaconResult = data;
+            });
+            print("Beacons Data Received: " + data);
+          }
+        },
+        onDone: () {},
+        onError: (error) {
+          print("Error: $error");
+        });
+  }
+
+  Future<void> _requestPermissions() async {
+    // Request location and Bluetooth permissions
+    Map<Permission, PermissionStatus> statuses = await [
+      Permission.locationAlways,
+      Permission.locationWhenInUse,
+      Permission.bluetooth,
+      Permission.bluetoothConnect,
+      Permission.bluetoothScan,
+    ].request();
+
+    // Check if permissions are granted
+    if (statuses[Permission.locationWhenInUse]!.isDenied ||
+        statuses[Permission.bluetooth]!.isDenied ||
+        statuses[Permission.bluetoothConnect]!.isDenied ||
+        statuses[Permission.bluetoothScan]!.isDenied) {
+      // Handle permission denied scenario
+      print("Permissions denied, please enable them in settings. "
+          "\n locationWhenInUse: ${statuses[Permission.locationWhenInUse]}"
+          "\n bluetooth: ${statuses[Permission.bluetooth]}"
+          "\n bluetoothConnect: ${statuses[Permission.bluetoothConnect]}"
+          "\n bluetoothScan: ${statuses[Permission.bluetoothScan]}");
+    } else {
+      print("All necessary permissions granted.");
+    }
+  }
+
+  @override
+  void dispose() {
+    // Stop monitoring and clear regions when disposed
+    BeaconsPlugin.stopMonitoring();
+    BeaconsPlugin.clearRegions();
+    beaconEventsController.close();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[900],
-      appBar: AppBar(
-        title: Text('Test App'),
-        centerTitle: true,
-        backgroundColor: Colors.grey[850],
-        elevation: 0.0,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.fromLTRB(30.0, 40.0, 30.0, 0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            const Text(
-              'Device UUID',
-              style: TextStyle(
-                color: Colors.grey,
-                letterSpacing: 2.0,
-              ),
-            ),
-            const SizedBox(height: 10.0),
-            Text(
-              _uuid,
-              style: TextStyle(
-                color: Colors.amberAccent[200],
-                fontWeight: FontWeight.bold,
-                fontSize: 28.0,
-                letterSpacing: 2.0,
-              ),
-            ),
-            const SizedBox(height: 10.0),
-          ],
-        ),
+      appBar: AppBar(title: Text('Beacon Scanner')),
+      body: Center(
+        child: Text('Beacon Data: $_beaconResult'),
       ),
     );
   }
