@@ -55,11 +55,12 @@ class MOYAI extends StatelessWidget {
     );
   }
 }
-
+var test = 0;
 class HomeScreen extends StatelessWidget {
   const HomeScreen({
     super.key,
   });
+
 
   @override
   Widget build(BuildContext context) {
@@ -122,7 +123,7 @@ class HomeScreen extends StatelessWidget {
                     notificationOptions: NotificationOptions(
                       id: 1,
                       title: 'Dash Bubble Playground',
-                      body: 'Dash Bubble service is running',
+                      body: '$test',
                       channelId: 'dash_bubble_notification',
                       channelName: 'Dash Bubble Notification',
                     ),
@@ -254,6 +255,7 @@ class HomeScreen extends StatelessWidget {
   }
 
   Future<void> _isRunning(BuildContext context) async {
+    test = test + 1;
     await _runMethod(
       context,
           () async {
@@ -262,7 +264,7 @@ class HomeScreen extends StatelessWidget {
         SnackBars.show(
           context: context,
           status: SnackBarStatus.success,
-          message: isRunning ? 'Bubble is Running' : 'Bubble is not Running',
+          message: isRunning ? 'Bubble is Running $test' : 'Bubble is not Running $test',
         );
       },
     );
