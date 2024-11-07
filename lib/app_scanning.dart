@@ -52,8 +52,7 @@ class _TabScanningState extends State<TabScanning> {
     isScanning = true;
     final regions = <Region>[
       Region(
-        identifier: 'Cubeacon',
-        proximityUUID: '78d718c7-c25e-4511-9bfe-67b4e99595ff',
+        identifier: 'All-Beacons',
       ),
       Region(
         identifier: 'BeaconType2',
